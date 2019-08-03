@@ -3,7 +3,7 @@ import './App.css';
 import Item from './item';
 import { TextField } from '@material-ui/core';
 import { connect } from 'react-redux';
-import { addTodo, deleteTodo } from './actions';
+import { addTodo, deleteTodo, undoTodo, redoTodo } from './actions';
 import {bindActionCreators} from 'redux';
 
 class Todo extends React.Component {
@@ -12,6 +12,23 @@ class Todo extends React.Component {
     this.state = {
       todotext: ''
     };
+  }
+
+  keydownHandler = (e) =>{
+    if(e.keyCode===90 && e.ctrlKey) { // Undo
+      this.props.undoTodo();
+    } else if (e.keyCode===89 && e.ctrlKey) {
+      this.props.redoTodo();
+      console.log(this.props);
+    }
+  }
+
+  componentDidMount = () => {
+    document.addEventListener('keydown',this.keydownHandler);
+  }
+
+  componentWillUnmount = () => {
+    document.removeEventListener('keydown',this.keydownHandler);
   }
 
   handleSubmit = (e) => {
@@ -48,7 +65,7 @@ class Todo extends React.Component {
           />
         </form>
         <div>
-            {this.props.todos.map(todo => (
+            {this.props.todos.todos.map(todo => (
               <Item key={todo.id} click={() => this.props.deleteTodo(todo.id)} text={todo.text} />))}
         </div>
       </div>
@@ -63,7 +80,9 @@ const mapStateToProps = state => {
 const mapDispatchToProps = (dispatch) => {
   return bindActionCreators({
     addTodo,
-    deleteTodo
+    deleteTodo,
+    undoTodo,
+    redoTodo
   }, dispatch);
 }
 
